@@ -1,3 +1,4 @@
+import os.path
 import time
 import torch
 import tqdm
@@ -15,9 +16,9 @@ if __name__ == '__main__':
     print(torch.backends.cudnn.version())
     print(torch.cuda.get_device_name(0))
 
-    np.random.seed(0)
-    torch.manual_seed(0)
-    torch.cuda.manual_seed(0)
+    # np.random.seed(0)
+    # torch.manual_seed(0)
+    # torch.cuda.manual_seed(0)
 
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     # device = torch.device('cpu')
@@ -26,6 +27,7 @@ if __name__ == '__main__':
     # 读取数据，构建dataset, dataloader
     train_imgs_path = "./BitmojiDataset_Sample/trainimages"
     train_labels_path = "./BitmojiDataset_Sample/train.csv"
+    model_save_path = "./model_save"
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Resize((224, 224))
@@ -45,8 +47,8 @@ if __name__ == '__main__':
 
     loss_fn = torch.nn.CrossEntropyLoss()
     loss_fn.to(device)
-    lr = 5e-2
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    lr = 5e-5
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=5e-4)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)  # 每3个epoch变为0.1倍
 
     epochs = 20
@@ -87,7 +89,9 @@ if __name__ == '__main__':
         acc = train_pred_true_num / len(train_dataset)
         train_acc.append(acc)
 
-        print("epoch{}: average_train_loss {}".format(epoch + 1, np.mean(train_loss)))
+        torch.save(model.state_dict(), os.path.join(model_save_path, "epoch_{}_{:.2f}%.pth".format(epoch+1, acc*100)))
+
+        print("\nepoch{}: average_train_loss {}".format(epoch + 1, np.mean(train_loss)))
         print("epoch{}: train_acc {:.2f}%".format(epoch + 1, acc * 100))
 
         # test
@@ -106,5 +110,5 @@ if __name__ == '__main__':
         acc = val_pred_true_num / len(val_dataset)
         val_acc.append(acc)
 
-        print("epoch{}: average_test_loss:{}".format(epoch + 1, np.mean(val_loss)))
-        print("epoch{}: test_acc:{:.2f}%".format(epoch + 1, acc * 100))
+        print("\nepoch{}: average_test_loss:{}".format(epoch + 1, np.mean(val_loss)))
+        print("epoch{}: val_acc:{:.2f}%".format(epoch + 1, acc * 100))

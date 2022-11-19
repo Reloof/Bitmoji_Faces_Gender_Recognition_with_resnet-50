@@ -8,7 +8,7 @@ from PIL import Image
 
 
 def read_split_data(imgs, labels, val_ratio=0.2, plot=False):
-    random.seed(0)
+    # random.seed(0)
     assert os.path.exists(imgs), "imgs root:{} does not exist".format(imgs)
     assert os.path.exists(labels), "imgs root:{} does not exist".format(labels)
 
@@ -70,7 +70,7 @@ class MyDataset(Dataset):
         return len(self.image_path)
 
     def __getitem__(self, item):
-        img = Image.open(self.image_path[item])
+        img = Image.open(self.image_path[item]).convert('RGB')
         if img.mode != 'RGB':
             raise ValueError("image: {} isn't RGB mode".format(self.image_path[item]))
         label = self.image_class[item]
