@@ -41,11 +41,12 @@ if __name__ == '__main__':
     # 创建模型
     model = Resnet_50()
     model.to(device)
-    model.Init_weight()
+    # model.Init_weight()
 
     loss_fn = torch.nn.CrossEntropyLoss()
     loss_fn.to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=5e-4)
+    lr = 5e-2
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)  # 每3个epoch变为0.1倍
 
     epochs = 20
