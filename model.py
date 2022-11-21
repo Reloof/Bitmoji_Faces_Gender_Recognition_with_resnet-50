@@ -81,10 +81,8 @@ class Resnet_50(nn.Module):
 
         self.avgpool = nn.AvgPool2d((7, 7))
         self.flat = nn.Flatten()
-        self.linear1 = nn.Linear(2048, 512)
-        self.linear2 = nn.Linear(512, 64)
-        self.linear3 = nn.Linear(64, 16)
-        self.linear4 = nn.Linear(16, 2)
+        self.linear1 = nn.Linear(2048, 8)
+        self.linear2 = nn.Linear(8, 2)
 
     def forward(self, x):
         output = self.stage0(x)
@@ -129,8 +127,6 @@ class Resnet_50(nn.Module):
         output = self.flat(output)
         output = self.linear1(output)
         output = self.linear2(output)
-        output = self.linear3(output)
-        output = self.linear4(output)
 
         return output
 

@@ -9,6 +9,7 @@ from torchvision import transforms
 from PIL import Image
 
 from model import Resnet_50
+from wzy_model import ResNet50
 from create_dataset import read_split_data, MyDataset
 
 if __name__ == '__main__':
@@ -23,8 +24,8 @@ if __name__ == '__main__':
         transforms.Resize((224, 224))
     ])
 
-    weight_filepath = "./model_save/epoch_20_99.62%.pth"
-    model = Resnet_50()
+    weight_filepath = "./model_save/epoch_15_100.00%.pth"
+    model = ResNet50()
     model.load_state_dict(torch.load(weight_filepath))
     model.to(device)
 

@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 
 from model import Resnet_50
+from wzy_model import ResNet50
 from create_dataset import read_split_data, MyDataset
 
 
@@ -33,7 +34,7 @@ if __name__ == '__main__':
         transforms.Resize((224, 224))
     ])
 
-    train_imgs, train_labels, val_imgs, val_labels = read_split_data(train_imgs_path, train_labels_path, val_ratio=0.3, plot=True)
+    train_imgs, train_labels, val_imgs, val_labels = read_split_data(train_imgs_path, train_labels_path, val_ratio=0.001, plot=False)
     train_dataset = MyDataset(train_imgs, train_labels, transform)
     val_dataset = MyDataset(val_imgs, val_labels, transform)
     batch_size = 32
