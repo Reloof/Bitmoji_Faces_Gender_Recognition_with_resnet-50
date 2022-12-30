@@ -5,9 +5,11 @@ import tqdm
 import numpy as np
 from torch.utils.data import DataLoader
 from torchvision import transforms
+import pandas as pd
+import resnet50
+import resnet50_stage4
+import resnet50_stage34
 
-from model import Resnet_50
-from wzy_model import ResNet50
 from create_dataset import read_split_data, MyDataset
 
 
@@ -17,15 +19,16 @@ if __name__ == '__main__':
     print(torch.backends.cudnn.version())
     print(torch.cuda.get_device_name(0))
 
-    # np.random.seed(0)
-    # torch.manual_seed(0)
-    # torch.cuda.manual_seed(0)
+    np.random.seed(0)
+    torch.manual_seed(0)
+    torch.cuda.manual_seed(0)
 
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     # device = torch.device('cpu')
     print("using device: ", device)
 
     # 读取数据，构建dataset, dataloader
+    # 实现数据增强只需要更改imgs和labels的path为"./BitmojiDataset_Sample/augmentimages"和"./BitmojiDataset_Sample/augment_label.csv"
     train_imgs_path = "./BitmojiDataset_Sample/trainimages"
     train_labels_path = "./BitmojiDataset_Sample/train.csv"
     model_save_path = "./model_save"
@@ -34,7 +37,7 @@ if __name__ == '__main__':
         transforms.Resize((224, 224))
     ])
 
-    train_imgs, train_labels, val_imgs, val_labels = read_split_data(train_imgs_path, train_labels_path, val_ratio=0.001, plot=False)
+    train_imgs, train_labels, val_imgs, val_labels = read_split_data(train_imgs_path, train_labels_path, val_ratio=0.3, plot=False)
     train_dataset = MyDataset(train_imgs, train_labels, transform)
     val_dataset = MyDataset(val_imgs, val_labels, transform)
     batch_size = 32
@@ -42,7 +45,7 @@ if __name__ == '__main__':
     val_loader = DataLoader(val_dataset, batch_size)
 
     # 创建模型
-    model = Resnet_50()
+    model = resnet50_stage34.ResNet50()
     model.to(device)
     # model.Init_weight()
 
@@ -52,7 +55,7 @@ if __name__ == '__main__':
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=5e-4)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)  # 每3个epoch变为0.1倍
 
-    epochs = 20
+    epochs = 10
     num_iters = 0
 
     train_losses = []
@@ -88,9 +91,9 @@ if __name__ == '__main__':
                              running_time='{:.2f}s'.format(time.perf_counter()-start_time))
         scheduler.step()
         acc = train_pred_true_num / len(train_dataset)
-        train_acc.append(acc)
+        train_acc.append(acc.item())
 
-        torch.save(model.state_dict(), os.path.join(model_save_path, "epoch_{}_{:.2f}%.pth".format(epoch+1, acc*100)))
+        # torch.save(model.state_dict(), os.path.join(model_save_path, "epoch_{}_{:.2f}%.pth".format(epoch+1, acc*100)))
 
         print("\nepoch{}: average_train_loss {}".format(epoch + 1, np.mean(train_loss)))
         print("epoch{}: train_acc {:.2f}%".format(epoch + 1, acc * 100))
@@ -109,7 +112,13 @@ if __name__ == '__main__':
                 val_loss.append(loss.item())
                 val_pred_true_num += (outputs.argmax(1) == targets).sum()
         acc = val_pred_true_num / len(val_dataset)
-        val_acc.append(acc)
+        val_acc.append(acc.item())
 
         print("\nepoch{}: average_test_loss:{}".format(epoch + 1, np.mean(val_loss)))
         print("epoch{}: val_acc:{:.2f}%".format(epoch + 1, acc * 100))
+
+    writer = pd.ExcelWriter('res.xlsx', mode='a', engine='openpyxl')
+    df = pd.DataFrame([train_losses, train_acc, val_acc], ['train_loss', 'train_acc', 'val_acc'])
+    df.to_excel(writer, sheet_name='stage34')
+    writer.save()
+    writer.close()
