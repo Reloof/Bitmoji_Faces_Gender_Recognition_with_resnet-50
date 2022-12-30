@@ -7,8 +7,8 @@ use Bitmoji cartoon faces imgs to recognize render such as:
 ![female](https://raw.githubusercontent.com/Reloof/Bitmoji_Faces_Gender_Recognition_with_resnet-50/master/BitmojiDataset_Sample/trainimages/0001.jpg)
 
 ## Train
-1. Download the full dataset in [Google drive](https://drive.google.com/file/d/1cZi4WYOrtOkDYLfpOkICMLvEKLVG9eN2/view?usp=share_link)  
-2. Replace the **BitmojiDataset_Sample** folder
+1. Download the full dataset on [Google drive](https://drive.google.com/file/d/1cZi4WYOrtOkDYLfpOkICMLvEKLVG9eN2/view?usp=share_link)  
+2. Unzip it && replace the **BitmojiDataset_Sample** folder
 3. Run **run.py**
 
 ## Test
